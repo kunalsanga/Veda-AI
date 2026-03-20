@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Veda AI - Intelligent Assessment Creator",
+  title: "VedaAI - AI-Powered Assignment Management",
   description:
-    "Create professional, AI-powered question papers and assessments in seconds. Powered by advanced language models for educators.",
-  keywords: ["AI", "assessment", "question paper", "education", "exam generator"],
+    "Create, manage, and grade assignments with AI assistance. Set up rubrics, define marking criteria, and streamline your teaching workflow.",
+  keywords: ["AI", "assignment", "education", "grading", "VedaAI"],
 };
 
 export default function RootLayout({

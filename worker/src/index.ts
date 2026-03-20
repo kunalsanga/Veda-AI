@@ -11,6 +11,8 @@ const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/veda-ai";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
+const isTLS = REDIS_URL.startsWith("rediss://");
+
 // Socket.io client to communicate with backend
 let socket: Socket;
 
@@ -44,6 +46,15 @@ async function start() {
     const connection = new Redis(REDIS_URL, {
       maxRetriesPerRequest: null,
       enableReadyCheck: false,
+      ...(isTLS ? { tls: { rejectUnauthorized: false } } : {}),
+    });
+
+    connection.on("connect", () => {
+      console.log("✅ Worker Redis connected");
+    });
+
+    connection.on("error", (err) => {
+      console.error("Worker Redis error:", err.message);
     });
 
     // Create BullMQ worker

@@ -4,7 +4,21 @@ import { generateQuestionPaper } from "./ai/generator";
 import { validatePaperResult } from "./ai/validator";
 import Redis from "ioredis";
 
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+let redis: Redis | null = null;
+
+function getRedis(): Redis {
+  if (!redis) {
+    const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
+    const isTLS = REDIS_URL.startsWith("rediss://");
+    redis = new Redis(REDIS_URL, {
+      ...(isTLS ? { tls: { rejectUnauthorized: false } } : {}),
+    });
+    redis.on("error", (err) => {
+      console.error("Processor Redis error:", err.message);
+    });
+  }
+  return redis;
+}
 
 const MAX_RETRIES = 3;
 
@@ -84,7 +98,7 @@ export async function processGeneration(
     await assignment.save();
 
     // 6. Cache in Redis
-    await redis.setex(
+    await getRedis().setex(
       `assignment:${assignmentId}`,
       3600, // 1 hour TTL
       JSON.stringify(assignment)

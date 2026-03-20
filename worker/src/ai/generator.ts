@@ -11,18 +11,26 @@ interface InputData {
   fileContent?: string;
 }
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+let model: ReturnType<InstanceType<typeof GoogleGenerativeAI>["getGenerativeModel"]> | null = null;
 
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash-preview-05-20",
-  generationConfig: {
-    temperature: 0.7,
-    maxOutputTokens: 8192,
-    responseMimeType: "application/json",
-  },
-});
+function getModel() {
+  if (!model) {
+    const apiKey = process.env.GEMINI_API_KEY || "";
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not set in environment variables");
+    }
+    const genAI = new GoogleGenerativeAI(apiKey);
+    model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 8192,
+        responseMimeType: "application/json",
+      },
+    });
+  }
+  return model;
+}
 
 function buildPrompt(input: InputData): string {
   const questionTypeStr = input.questionTypes.join(", ");
@@ -78,7 +86,7 @@ export async function generateQuestionPaper(input: InputData): Promise<string> {
     const systemInstruction =
       "You are an expert educational assessment creator. You MUST respond with ONLY valid JSON. No markdown formatting, no code blocks, no explanations - just pure JSON.";
 
-    const result = await model.generateContent({
+    const result = await getModel().generateContent({
       contents: [
         {
           role: "user",

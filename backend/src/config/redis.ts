@@ -2,14 +2,26 @@ import Redis from "ioredis";
 
 let redis: Redis;
 
-export async function connectRedis(): Promise<Redis> {
-  redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379", {
+function getRedisOptions() {
+  const url = process.env.REDIS_URL || "redis://localhost:6379";
+  const isTLS = url.startsWith("rediss://");
+  return {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-  });
+    ...(isTLS ? { tls: { rejectUnauthorized: false } } : {}),
+  };
+}
+
+export async function connectRedis(): Promise<Redis> {
+  const url = process.env.REDIS_URL || "redis://localhost:6379";
+  redis = new Redis(url, getRedisOptions());
 
   redis.on("error", (err) => {
-    console.error("Redis error:", err);
+    console.error("Redis error:", err.message);
+  });
+
+  redis.on("connect", () => {
+    console.log("✅ Redis connected");
   });
 
   return redis;
