@@ -306,11 +306,34 @@ export default function AssignmentPage() {
     }
 
     fetchAssignment();
-  }, [assignmentId, setCurrentAssignment, setError]);
+
+    // 🔥 Fallback API Polling (Guaranteed Catch)
+    let isPolling = true;
+    const intervalId = setInterval(async () => {
+      if (!isPolling) return;
+      try {
+        const res = await getAssignment(assignmentId);
+        if (res.success) {
+          const status = res.data.status;
+          if (status === "completed" || status === "failed") {
+            isPolling = false;
+            clearInterval(intervalId);
+            setCurrentAssignment(res.data);
+            setProgress("");
+          }
+        }
+      } catch (e) {
+        // ignore polling errors quietly
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [assignmentId, setCurrentAssignment, setError, setProgress]);
 
   // Socket.io event listeners
   useEffect(() => {
     const unsubComplete = onEvent("generation-complete", (data: any) => {
+      console.log("🔥 EVENT RECEIVED (Complete):", data);
       // Re-fetch to get full data
       getAssignment(assignmentId).then((res) => {
         if (res.success) {
@@ -321,6 +344,7 @@ export default function AssignmentPage() {
     });
 
     const unsubProgress = onEvent("generation-progress", (data: any) => {
+      console.log("⚡ EVENT RECEIVED (Progress):", data);
       setProgress(data.progress || "Processing...");
     });
 
