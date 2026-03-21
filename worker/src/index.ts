@@ -3,15 +3,12 @@ dotenv.config();
 
 import mongoose from "mongoose";
 import { Worker, Job } from "bullmq";
-import Redis from "ioredis";
 import { io as ioClient, Socket } from "socket.io-client";
 import { processGeneration } from "./processor";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/veda-ai";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
-
-const isTLS = REDIS_URL.startsWith("rediss://");
 
 // Socket.io client to communicate with backend
 let socket: Socket;
@@ -42,21 +39,6 @@ async function start() {
     // Connect WebSocket
     connectSocket();
 
-    // Create Redis connection for BullMQ
-    const connection = new Redis(REDIS_URL, {
-      maxRetriesPerRequest: null,
-      enableReadyCheck: false,
-      ...(isTLS ? { tls: { rejectUnauthorized: false } } : {}),
-    });
-
-    connection.on("connect", () => {
-      console.log("✅ Worker Redis connected");
-    });
-
-    connection.on("error", (err) => {
-      console.error("Worker Redis error:", err.message);
-    });
-
     // Create BullMQ worker
     const worker = new Worker(
       "generate-paper",
@@ -65,7 +47,9 @@ async function start() {
         await processGeneration(job.data.assignmentId, socket);
       },
       {
-        connection,
+        connection: {
+          url: process.env.REDIS_URL!
+        },
         concurrency: 2,
         limiter: {
           max: 5,

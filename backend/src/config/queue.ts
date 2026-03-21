@@ -1,24 +1,13 @@
 import { Queue } from "bullmq";
-import Redis from "ioredis";
 
 let paperQueue: Queue | null = null;
 
-function createConnection(): Redis {
-  const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-  const isTLS = redisUrl.startsWith("rediss://");
-
-  return new Redis(redisUrl, {
-    maxRetriesPerRequest: null,
-    enableReadyCheck: false,
-    ...(isTLS ? { tls: { rejectUnauthorized: false } } : {}),
-  });
-}
-
 export function getQueue(): Queue {
   if (!paperQueue) {
-    const connection = createConnection();
     paperQueue = new Queue("generate-paper", {
-      connection,
+      connection: {
+        url: process.env.REDIS_URL!
+      },
       defaultJobOptions: {
         removeOnComplete: 100,
         removeOnFail: 50,
