@@ -7,7 +7,7 @@ import { io as ioClient, Socket } from "socket.io-client";
 import { processGeneration } from "./processor";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/veda-ai";
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/veda-ai";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:4000";
 
 // Socket.io client to communicate with backend

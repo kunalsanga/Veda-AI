@@ -46,7 +46,7 @@ const PORT = process.env.PORT || 4000;
 async function start() {
   try {
     // Connect to MongoDB
-    const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/veda-ai";
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/veda-ai";
     await mongoose.connect(mongoUri);
     console.log("✅ Connected to MongoDB");
 
