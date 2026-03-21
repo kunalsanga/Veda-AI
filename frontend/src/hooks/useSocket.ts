@@ -9,7 +9,7 @@ export function useSocket(assignmentId: string | null) {
   const socketRef = useRef<Socket | null>(null);
 
   const connect = useCallback(() => {
-    if (socketRef.current?.connected) return socketRef.current;
+    if (socketRef.current) return socketRef.current;
 
     const socket = io(WS_URL, {
       transports: ["websocket", "polling"],

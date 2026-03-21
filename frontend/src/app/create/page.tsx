@@ -38,7 +38,7 @@ const QUESTION_TYPE_OPTIONS = [
 
 export default function CreatePage() {
   const router = useRouter();
-  const { setIsSubmitting, isSubmitting, setError } = useAssignmentStore();
+  const { isSubmitting, setIsSubmitting, error, setError } = useAssignmentStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -120,6 +120,15 @@ export default function CreatePage() {
   };
 
   const handleSubmit = async () => {
+    if (!chapter.trim()) {
+      setError("Please enter a chapter or subject name.");
+      return;
+    }
+    if (!dueDate) {
+      setError("Please select a due date.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError(null);
@@ -402,6 +411,14 @@ export default function CreatePage() {
             </div>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-medium border border-red-100 flex items-center gap-2">
+            <X className="w-4 h-4" />
+            {error}
+          </div>
+        )}
 
         {/* Navigation Buttons */}
         <div className="flex items-center justify-between mb-8">

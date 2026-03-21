@@ -53,12 +53,28 @@
 
 /* Print styles for PDF export */
 @media print {
-  .no-print {
+  @page {
+    margin: 0.5cm;
+  }
+  .no-print, aside, nav, header {
     display: none !important;
   }
-  body {
+  body, main {
     background: white !important;
     color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .bg-\[\#4b4b4b\] {
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  #exam-paper {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 10px !important;
   }
   .print-break {
     page-break-before: always;

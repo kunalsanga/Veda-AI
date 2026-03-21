@@ -34,13 +34,19 @@ export default function AssignmentCard({
   }, []);
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative group hover:shadow-md transition-shadow">
+    <div 
+      onClick={() => onView?.(id)}
+      className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative group hover:shadow-md transition-shadow cursor-pointer"
+    >
       {/* Title row */}
       <div className="flex items-start justify-between mb-8">
         <h3 className="text-lg md:text-xl font-black tracking-tight text-foreground pr-4 pt-1">{title}</h3>
         <div className="relative" ref={menuRef}>
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen(!menuOpen);
+            }}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <MoreVertical className="w-5 h-5 text-muted-foreground" />
@@ -50,7 +56,8 @@ export default function AssignmentCard({
           {menuOpen && (
             <div className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-10">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onView?.(id);
                   setMenuOpen(false);
                 }}
@@ -59,7 +66,8 @@ export default function AssignmentCard({
                 View Assignment
               </button>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onDelete?.(id);
                   setMenuOpen(false);
                 }}

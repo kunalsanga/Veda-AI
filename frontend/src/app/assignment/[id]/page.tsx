@@ -13,6 +13,7 @@ import {
   Clock,
   Zap,
 } from "lucide-react";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useAssignmentStore } from "@/store/assignmentStore";
 import { getAssignment, regenerateAssignment } from "@/lib/api";
@@ -134,13 +135,14 @@ function ErrorState({
   );
 }
 
-// Exam Paper Component
 function ExamPaper({
   assignment,
   paperRef,
+  onExportPDF,
 }: {
   assignment: Assignment;
   paperRef: React.RefObject<HTMLDivElement>;
+  onExportPDF: () => void;
 }) {
   const result = assignment.result!;
   const totalMarks = result.sections.reduce(
@@ -150,136 +152,119 @@ function ExamPaper({
   );
 
   return (
-    <div ref={paperRef} className="max-w-4xl mx-auto" id="exam-paper">
-      {/* Paper Header */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm mb-6">
-        <div className="gradient-primary p-6 text-white">
-          <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-bold mb-1">
-              {assignment.inputData.subject}
-            </h1>
-            <p className="text-white/80 text-lg">{assignment.inputData.topic}</p>
-          </div>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <p className="text-muted-foreground text-xs">Grade</p>
-              <p className="font-semibold">{assignment.inputData.grade}</p>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <p className="text-muted-foreground text-xs">Total Marks</p>
-              <p className="font-semibold">{totalMarks}</p>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <p className="text-muted-foreground text-xs">Questions</p>
-              <p className="font-semibold">
-                {result.sections.reduce(
-                  (acc, s) => acc + s.questions.length,
-                  0
-                )}
-              </p>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-xl">
-              <p className="text-muted-foreground text-xs">Due Date</p>
-              <p className="font-semibold">
-                {new Date(assignment.inputData.dueDate).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-
-          {/* Student Info */}
-          <div className="border-t border-gray-100 pt-6">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-              Student Information
-            </h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
-                  Name:
-                </span>
-                <div className="flex-1 border-b-2 border-gray-300 pb-1" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
-                  Roll No:
-                </span>
-                <div className="flex-1 border-b-2 border-gray-300 pb-1" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
-                  Section:
-                </span>
-                <div className="flex-1 border-b-2 border-gray-300 pb-1" />
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="w-full max-w-[1000px] mx-auto">
+      {/* Header text */}
+      <div className="text-white mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 no-print">
+        <p className="text-[15px] font-medium leading-relaxed max-w-3xl">
+          Certainly! Here is the customized Question Paper for your {assignment.inputData.grade} {assignment.inputData.subject} classes:
+        </p>
+        <Button onClick={onExportPDF} className="bg-white text-black hover:bg-gray-100 rounded-full h-10 px-6 shrink-0 flex items-center gap-2 font-semibold">
+          <Download className="w-4 h-4" />
+          Download as PDF
+        </Button>
       </div>
 
-      {/* Question Sections */}
-      {result.sections.map((section, sIdx) => (
-        <div
-          key={sIdx}
-          className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-6 overflow-hidden"
-        >
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-800">
-                {section.title}
-              </h2>
-              <span className="text-sm text-muted-foreground">
-                {section.questions.reduce((acc, q) => acc + q.marks, 0)} marks
-              </span>
+      {/* The Paper itself */}
+      <div ref={paperRef} id="exam-paper" className="bg-white rounded-[24px] p-8 md:p-12 text-black font-sans shadow-inner">
+         
+         {/* School Header */}
+         <div className="text-center mb-10 text-gray-900 flex flex-col gap-1.5">
+           <h1 className="text-3xl font-bold tracking-tight">Delhi Public School, Sector-4, Bokaro</h1>
+           <p className="font-medium text-lg">Subject: {assignment.inputData.subject}</p>
+           <p className="font-medium text-lg">Class: {assignment.inputData.grade}</p>
+         </div>
+
+         {/* Meta info row */}
+         <div className="flex justify-between items-center text-[15px] font-semibold mb-6">
+            <span>Time Allowed: 45 minutes</span>
+            <span>Maximum Marks: {totalMarks}</span>
+         </div>
+
+         <p className="font-semibold text-[15px] mb-8">All questions are compulsory unless stated otherwise.</p>
+
+         {/* Student Details */}
+         <div className="space-y-4 mb-12 text-[15px] max-w-md font-semibold">
+            <div className="flex gap-2 items-end">
+              <span>Name:</span>
+              <div className="flex-1 border-b-[1.5px] border-black pb-1"></div>
             </div>
-            <p className="text-sm text-muted-foreground mt-1 italic">
-              {section.instruction}
-            </p>
-          </div>
-          <div className="p-6 space-y-6">
-            {section.questions.map((question, qIdx) => (
-              <div
-                key={qIdx}
-                className="group p-4 rounded-xl border border-gray-100 hover:border-violet-200 hover:bg-violet-50/30 transition-all duration-200"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-bold">
-                    {qIdx + 1}
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-gray-800 leading-relaxed mb-3">
-                      {question.question}
-                    </p>
+            <div className="flex gap-2 items-end">
+              <span>Roll Number:</span>
+              <div className="flex-1 border-b-[1.5px] border-black pb-1"></div>
+            </div>
+            <div className="flex items-end flex-wrap">
+              <span className="mr-2 mb-1">Class: {assignment.inputData.grade} Section:</span>
+              <div className="flex-1 border-b-[1.5px] border-black pb-1 min-w-[50px]"></div>
+            </div>
+         </div>
 
-                    {/* MCQ Options */}
-                    {question.options && question.options.length > 0 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                        {question.options.map((option, oIdx) => (
-                          <div
-                            key={oIdx}
-                            className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 text-sm"
-                          >
-                            <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
-                            <span>{option}</span>
+         {/* Sections structure */}
+         <div className="space-y-10">
+           {result.sections.map((section, sIdx) => {
+             return (
+             <div key={sIdx}>
+               <h2 className="text-xl font-bold text-center mb-6">{section.title}</h2>
+               
+               <div className="mb-6 space-y-1">
+                 <p className="text-[14px] italic text-gray-800">
+                    {section.instruction}
+                 </p>
+               </div>
+
+               <div className="space-y-5">
+                  {section.questions.map((question, qIdx) => {
+                    const diffText = question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1);
+                    return (
+                    <div key={qIdx} className="text-[15px] leading-relaxed flex gap-2">
+                      <span className="shrink-0">{qIdx + 1}.</span>
+                      <div>
+                        <span className="text-gray-600">[{diffText}]</span>{" "}
+                        <span>{question.question}</span>{" "}
+                        <span className="text-gray-600">[{question.marks} {question.marks === 1 ? 'Mark' : 'Marks'}]</span>
+                        
+                        {/* MCQ Options */}
+                        {question.options && question.options.length > 0 && (
+                          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {question.options.map((opt, oIdx) => (
+                              <div key={oIdx}>
+                                 {opt}
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-
-                    <div className="flex items-center gap-3">
-                      <DifficultyBadge difficulty={question.difficulty} />
-                      <span className="text-xs text-muted-foreground font-medium px-2.5 py-0.5 rounded-full bg-gray-100">
-                        {question.marks}{" "}
-                        {question.marks === 1 ? "mark" : "marks"}
-                      </span>
                     </div>
+                  )} )}
+               </div>
+             </div>
+           )} )}
+         </div>
+
+         {/* End marker */}
+         <div className="mt-12 mb-16">
+           <p className="font-semibold text-[15px] text-gray-800">End of Question Paper</p>
+         </div>
+
+         {/* Answer Key block */}
+         <div className="pt-10 border-t-2 border-dashed border-gray-300">
+            <h2 className="text-xl font-bold mb-6 text-gray-900">Answer Key:</h2>
+            <div className="space-y-6">
+               {result.sections.map((section, sIdx) => (
+                  <div key={sIdx} className="space-y-4">
+                    {section.questions.map((question, qIdx) => (
+                       <div key={qIdx} className="text-[15px] flex gap-2">
+                          <span className="shrink-0 text-gray-700">{qIdx + 1}.</span>
+                          <div className="leading-relaxed whitespace-pre-wrap text-gray-700">
+                             {question.answer || "Answer not provided."}
+                          </div>
+                       </div>
+                    ))}
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+               ))}
+            </div>
+         </div>
+
+      </div>
     </div>
   );
 }
@@ -378,64 +363,8 @@ export default function AssignmentPage() {
   };
 
   // Handle PDF Export
-  const handleExportPDF = async () => {
-    try {
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF = (await import("jspdf")).default;
-
-      const element = document.getElementById("exam-paper");
-      if (!element) return;
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-
-      // Handle multi-page
-      const pageHeight = pdfHeight;
-      let heightLeft = imgHeight * ratio;
-      let position = 0;
-
-      pdf.addImage(
-        imgData,
-        "PNG",
-        imgX,
-        position,
-        imgWidth * ratio,
-        imgHeight * ratio
-      );
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight * ratio;
-        pdf.addPage();
-        pdf.addImage(
-          imgData,
-          "PNG",
-          imgX,
-          position,
-          imgWidth * ratio,
-          imgHeight * ratio
-        );
-        heightLeft -= pageHeight;
-      }
-
-      const subject = currentAssignment?.inputData.subject || "paper";
-      pdf.save(`${subject}-question-paper.pdf`);
-    } catch (err) {
-      console.error("PDF export failed:", err);
-    }
+  const handleExportPDF = () => {
+    window.print();
   };
 
   const status = currentAssignment?.status;
@@ -445,58 +374,8 @@ export default function AssignmentPage() {
     status === "pending" || status === "processing" || (!isComplete && !isFailed && !loading);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/30 to-indigo-50/40">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10 no-print">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-violet-500/25">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">
-              <span className="gradient-text">Veda</span>{" "}
-              <span className="text-foreground/80">AI</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-3">
-            {isComplete && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRegenerate}
-                  disabled={regenerating}
-                  className="rounded-xl"
-                >
-                  <RefreshCw
-                    className={`w-4 h-4 mr-2 ${
-                      regenerating ? "animate-spin" : ""
-                    }`}
-                  />
-                  Regenerate
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleExportPDF}
-                  className="rounded-xl"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export PDF
-                </Button>
-              </>
-            )}
-            <Link
-              href="/create"
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              New Paper
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <div className="pt-28 pb-16 px-4 md:px-6">
+    <AppLayout showTopBar={false}>
+      <div className="min-h-[calc(100vh-80px)] lg:min-h-[calc(100vh-32px)] bg-[#4b4b4b] rounded-t-3xl lg:rounded-3xl p-6 md:p-8 flex flex-col">
         {/* Status Header */}
         {!loading && (
           <div className="max-w-4xl mx-auto mb-8 no-print">
@@ -533,9 +412,9 @@ export default function AssignmentPage() {
           />
         )}
         {!loading && isComplete && currentAssignment && (
-          <ExamPaper assignment={currentAssignment} paperRef={paperRef} />
+          <ExamPaper assignment={currentAssignment} paperRef={paperRef} onExportPDF={handleExportPDF} />
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }
