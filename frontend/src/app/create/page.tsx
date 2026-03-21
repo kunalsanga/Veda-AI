@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import AppLayout from "@/components/layout/AppLayout";
 import { useAssignmentStore } from "@/store/assignmentStore";
-import { createAssignment } from "@/lib/api";
+import { createAssignment, pingHealth } from "@/lib/api";
 
 interface QuestionTypeRow {
   id: string;
@@ -40,6 +40,7 @@ export default function CreatePage() {
   const router = useRouter();
   const { isSubmitting, setIsSubmitting, error, setError } = useAssignmentStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isWaking, setIsWaking] = useState(false);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dueDate, setDueDate] = useState("");
@@ -131,7 +132,17 @@ export default function CreatePage() {
 
     try {
       setIsSubmitting(true);
+      setIsWaking(true);
       setError(null);
+
+      // Warm-up ping for cold starts
+      try {
+        await pingHealth();
+      } catch (e) {
+        console.warn("Health ping failed or timed out", e);
+      } finally {
+        setIsWaking(false);
+      }
 
       const payload = {
         subject: chapter,
@@ -165,7 +176,8 @@ export default function CreatePage() {
         router.push(`/assignment/${response.data.id}`);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to create assignment");
+      console.error(err);
+      setError(err.message || "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
@@ -437,7 +449,7 @@ export default function CreatePage() {
             {isSubmitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating...
+                {isWaking ? "Waking up server..." : "Creating..."}
               </>
             ) : (
               <>

@@ -4,7 +4,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
-  timeout: 30000,
+  timeout: 60000,
 });
 
 export interface CreateAssignmentPayload {
@@ -34,10 +34,25 @@ export async function createAssignment(data: CreateAssignmentPayload) {
     formData.append("file", data.file);
   }
 
-  const response = await api.post("/assignments", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
+  for (let i = 0; i < 2; i++) {
+    try {
+      const response = await api.post("/assignments", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data;
+    } catch (err) {
+      if (i === 1) throw err;
+    }
+  }
+}
+
+export async function pingHealth() {
+  try {
+    const response = await api.get("/health", { timeout: 5000 });
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
 }
 
 export async function getAssignment(id: string) {
