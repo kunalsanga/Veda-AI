@@ -2,6 +2,12 @@
 
 A production-grade, full-stack AI-powered assessment creation platform. Teachers can create assignments and generate structured question papers using AI, with real-time updates and PDF export.
 
+<img width="1919" height="903" alt="Screenshot 2026-03-22 011722" src="https://github.com/user-attachments/assets/c239bccf-aedc-4aee-915b-1a012035a921" />
+
+<img width="1901" height="908" alt="Image" src="https://github.com/user-attachments/assets/4804cf84-1856-4266-a354-6ac763aff178" />
+
+<img width="1919" height="910" alt="Image" src="https://github.com/user-attachments/assets/09f649b5-8265-40b5-a71c-798d999a0fd3" />
+
 ## 🏗️ Architecture
 
 ```
